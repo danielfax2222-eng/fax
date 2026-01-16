@@ -32,11 +32,19 @@ jobs:
         cd build
         mingw32-make -j2
 
+    - name: Locate exe
+      shell: powershell
+      run: |
+        $exe = Get-ChildItem build -Recurse -Filter *.exe | Select-Object -First 1
+        if (-not $exe) { Write-Error "EXE not found"; exit 1 }
+        Write-Host "Found exe at $($exe.FullName)"
+
     - name: Prepare release
       shell: powershell
       run: |
         New-Item -ItemType Directory -Force release
-        Copy-Item build\release\*.exe release -Force
+        $exe = Get-ChildItem build -Recurse -Filter *.exe | Select-Object -First 1
+        Copy-Item $exe.FullName release -Force
 
     - name: Deploy Qt DLLs
       shell: powershell
