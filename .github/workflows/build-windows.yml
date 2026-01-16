@@ -33,17 +33,15 @@ jobs:
     - name: Deploy Qt dependencies
       run: |
         cd build
-        for %%f in (*.exe) do windeployqt "%%f"
+        Get-ChildItem -Filter *.exe | ForEach-Object { windeployqt $_.Name }
 
     - name: Create ZIP
       run: |
-        copy build\*.exe release\ || echo No exe in root
-        copy build\release\*.exe release\ || echo No exe in release
-        copy build\debug\*.exe release\ || echo No exe in debug
-        xcopy build\*.dll release\ /E /I || echo No dlls
-        xcopy build\release\*.dll release\ /E /I || echo No dlls in release
-        powershell Compress-Archive release MotoTool_MTK_Windows_Qt5.zip
-
+        New-Item -ItemType Directory -Force release
+        Get-ChildItem build -Recurse -Filter *.exe | Copy-Item -Destination release -Force
+        Get-ChildItem build -Recurse -Filter *.dll | Copy-Item -Destination release -Force
+        Compress-Archive -Path release\* -DestinationPath MotoTool_MTK_Windows_Qt5.zip -Force
+    
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
