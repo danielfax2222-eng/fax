@@ -30,11 +30,13 @@ jobs:
         cd build
         mingw32-make -j2
 
-    - name: Prepare release folder
+     - name: Prepare release folder
       shell: powershell
       run: |
         New-Item -ItemType Directory -Force release
-        Copy-Item build\*.exe release -Force
+        $exe = Get-ChildItem build -Recurse -Filter *.exe | Select-Object -First 1
+        if (-not $exe) { Write-Error "No exe found"; exit 1 }
+        Copy-Item $exe.FullName release -Force
 
     - name: Deploy Qt
       shell: powershell
