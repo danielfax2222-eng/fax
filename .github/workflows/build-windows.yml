@@ -48,3 +48,13 @@ jobs:
 
         windeployqt $exe.FullName --dir release
 
+    - name: Create ZIP
+      shell: powershell
+      run: |
+        Compress-Archive -Path release\* -DestinationPath MotoTool_MTK_Windows_Qt5.zip -Force
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: MotoTool_MTK_Windows_Qt5
+        path: MotoTool_MTK_Windows_Qt5.zip
