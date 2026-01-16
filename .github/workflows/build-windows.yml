@@ -32,32 +32,19 @@ jobs:
         cd build
         mingw32-make -j2
 
-    - name: Locate exe
-      shell: powershell
-      run: |
-        $exe = Get-ChildItem build -Recurse -Filter *.exe | Select-Object -First 1
-        if (-not $exe) { Write-Error "EXE not found"; exit 1 }
-        Write-Host "Found exe at $($exe.FullName)"
-
-    - name: Prepare release
+    - name: Prepare release and deploy Qt
       shell: powershell
       run: |
         New-Item -ItemType Directory -Force release
+
         $exe = Get-ChildItem build -Recurse -Filter *.exe | Select-Object -First 1
+        if (-not $exe) {
+          Write-Error "EXE not found after build"
+          exit 1
+        }
+
+        Write-Host "Using exe: $($exe.FullName)"
         Copy-Item $exe.FullName release -Force
 
-    - name: Deploy Qt DLLs
-      shell: powershell
-      run: |
-        windeployqt release\*.exe
+        windeployqt $exe.FullName --dir release
 
-    - name: Create ZIP
-      shell: powershell
-      run: |
-        Compress-Archive -Path release\* -DestinationPath MotoTool_MTK_Windows_Qt5.zip -Force
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: MotoTool_MTK_Windows_Qt5
-        path: MotoTool_MTK_Windows_Qt5.zip
