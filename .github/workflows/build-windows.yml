@@ -33,7 +33,7 @@ jobs:
     - name: Deploy Qt dependencies
       run: |
         cd build
-        Get-ChildItem -Filter *.exe | ForEach-Object { windeployqt $_.Name }
+        for /r %%f in (*.exe) do windeployqt "%%f"
 
     - name: Create ZIP
       run: |
