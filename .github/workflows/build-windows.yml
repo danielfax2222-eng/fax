@@ -20,25 +20,25 @@ jobs:
         setup-python: false
 
     - name: Configure project
+      shell: bash
       run: |
         mkdir build
         cd build
         qmake ../MotoTool_MTK.pro
 
     - name: Build
+      shell: bash
       run: |
         cd build
         mingw32-make -j2
 
-    - name: Prepare release folder
+    - name: Prepare release
       shell: powershell
       run: |
         New-Item -ItemType Directory -Force release
-        $exe = Get-ChildItem build -Recurse -Filter *.exe | Select-Object -First 1
-        if (-not $exe) { Write-Error "No exe found"; exit 1 }
-        Copy-Item $exe.FullName release -Force
+        Copy-Item build\release\*.exe release -Force
 
-    - name: Deploy Qt
+    - name: Deploy Qt DLLs
       shell: powershell
       run: |
         windeployqt release\*.exe
@@ -48,7 +48,6 @@ jobs:
       run: |
         Compress-Archive -Path release\* -DestinationPath MotoTool_MTK_Windows_Qt5.zip -Force
 
-    
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
