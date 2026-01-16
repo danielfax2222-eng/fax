@@ -30,21 +30,22 @@ jobs:
         cd build
         mingw32-make -j2
 
-    - name: Deploy Qt dependencies
+    - name: Prepare release folder
+      shell: powershell
       run: |
-        Get-ChildItem build -Recurse -Filter *.exe | ForEach-Object {
-          Write-Host "Deploying Qt for $($_.FullName)"
-          windeployqt "$($_.FullName)"
+        New-Item -ItemType Directory -Force release
+        Copy-Item build\*.exe release -Force
+
+    - name: Deploy Qt
+      shell: powershell
+      run: |
+        windeployqt release\*.exe
 
     - name: Create ZIP
+      shell: powershell
       run: |
-         New-Item -ItemType Directory -Force release
-         Get-ChildItem build -Recurse -Filter *.exe | Copy-Item -Destination release -Force
-         Get-ChildItem build -Recurse -Filter *.dll | Copy-Item -Destination release -Force
-         Get-ChildItem build -Recurse -Directory | Where-Object {
-           $_.Name -in @("platforms","styles","imageformats","iconengines")
-         } | Copy-Item -Destination release -Recurse -Force
-         Compress-Archive -Path release\* -DestinationPath MotoTool_MTK_Windows_Qt5.zip -Force
+        Compress-Archive -Path release\* -DestinationPath MotoTool_MTK_Windows_Qt5.zip -Force
+
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
