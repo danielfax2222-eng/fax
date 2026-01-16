@@ -1,0 +1,49 @@
+name: Build MotoTool_MTK (Windows Qt5)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Qt 5
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '5.15.2'
+        arch: 'win64_mingw81'
+        tools: 'tools_mingw,tools_cmake'
+        setup-python: false
+
+    - name: Configure project
+      run: |
+        mkdir build
+        cd build
+        qmake ../MotoTool_MTK.pro
+
+    - name: Build
+      run: |
+        cd build
+        mingw32-make -j2
+
+    - name: Deploy Qt dependencies
+      run: |
+        cd build
+        windeployqt *.exe
+
+    - name: Create ZIP
+      run: |
+        mkdir release
+        copy build\*.exe release\
+        xcopy build\*.dll release\ /E /I
+        powershell Compress-Archive release MotoTool_MTK_Windows_Qt5.zip
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: MotoTool_MTK_Windows_Qt5
+        path: MotoTool_MTK_Windows_Qt5.zip
