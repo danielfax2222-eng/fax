@@ -30,7 +30,7 @@ jobs:
         cd build
         mingw32-make -j2
 
-     - name: Prepare release folder
+    - name: Prepare release folder
       shell: powershell
       run: |
         New-Item -ItemType Directory -Force release
