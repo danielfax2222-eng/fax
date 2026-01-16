@@ -33,13 +33,15 @@ jobs:
     - name: Deploy Qt dependencies
       run: |
         cd build
-        windeployqt *.exe
+        for %%f in (*.exe) do windeployqt "%%f"
 
     - name: Create ZIP
       run: |
-        mkdir release
-        copy build\*.exe release\
-        xcopy build\*.dll release\ /E /I
+        copy build\*.exe release\ || echo No exe in root
+        copy build\release\*.exe release\ || echo No exe in release
+        copy build\debug\*.exe release\ || echo No exe in debug
+        xcopy build\*.dll release\ /E /I || echo No dlls
+        xcopy build\release\*.dll release\ /E /I || echo No dlls in release
         powershell Compress-Archive release MotoTool_MTK_Windows_Qt5.zip
 
     - name: Upload artifact
